@@ -1,0 +1,66 @@
+# ==========================================
+# Python & Virtual Environments
+# ==========================================
+.venv/
+**/.venv/
+venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+
+# ==========================================
+# Large Media Files (Recordings)
+# Videos and audio exceed GitHub's 100MB limit
+# ==========================================
+**/record/*
+!**/record/.gitkeep
+
+# ==========================================
+# Heavy Pipeline Intermediate Artifacts
+# ==========================================
+**/pipeline/**/audio.mp3
+**/pipeline/**/slides/
+**/pipeline/**/slide_timestamps.txt
+**/pipeline/**/_legacy_loose_files/
+**/pipeline/**/_quarantine/
+
+# ==========================================
+# Local Binaries (Pre-compiled executables)
+# ==========================================
+bin/ffmpeg
+bin/ffprobe
+**/bin/ffmpeg
+**/bin/ffprobe
+
+# ==========================================
+# Java / IntelliJ IDEs (e.g. Further Prg)
+# ==========================================
+*.class
+**/*.class
+*.jar
+*.war
+**/code/out/
+**/code/.idea/
+*.iml
+.idea/
+**/.idea/
+out/
+**/out/
+
+# ==========================================
+# OS & Editor Files
+# ==========================================
+.DS_Store
+**/.DS_Store
+._*
+**/._*
+Thumbs.db
+*.swp
+*.swo
+*~
