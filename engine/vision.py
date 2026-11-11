@@ -150,7 +150,7 @@ def extract_slides(video_path: Path, task_dir: Path, force: bool = False) -> lis
         str(FFMPEG_BIN), "-y",
         "-i", str(video_path),
         "-vf", f"select='gt(scene,{SCENE_CHANGE_THRESHOLD})',showinfo",
-        "-vsync", "vfr",
+        "-fps_mode", "vfr",
         str(slides_dir / "slide_%03d.png")
     ]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)

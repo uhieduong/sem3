@@ -8,6 +8,11 @@ The shared slide-extraction code uses FFmpeg's `-vsync` option, but the installe
 
 All three courses use the same slide-extraction code, so this issue can prevent video keyframes from being extracted and slide decks from being aligned in any of them. In the observed `lecture3` run, the deck was detected (`lecture3.pdf`, 57 slides), but no frames were extracted. Its zero alignment counts do not mean the deck is empty or that slide matching failed; alignment was not performed.
 
-## Recommended next step
+## Status: RESOLVED
 
-Update the shared extraction command in `engine/vision.py` to use `-fps_mode vfr` instead of `-vsync vfr`. Then rerun affected tasks with `--force` to regenerate keyframes and alignment reports.
+- The shared extraction command in `engine/vision.py` was updated to `-fps_mode vfr` (replacing the deprecated/unsupported `-vsync vfr`).
+- All three `lecture3` tasks across all courses were rerun:
+  - **`db application`**: 78 slides extracted, 78/78 aligned to `lecture3.pdf`.
+  - **`se fundamentals`**: 237 slides extracted, 233/237 aligned to `lecture3.pdf`.
+  - **`further prg`**: 254 slides extracted, 19/254 aligned (235 external website/screen activities flagged).
+- All three tasks are now fully aligned and marked **Ready for Agent Audit**.

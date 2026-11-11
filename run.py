@@ -25,6 +25,7 @@ Usage:
 """
 
 import sys
+import subprocess
 import argparse
 from pathlib import Path
 from engine import (
@@ -101,6 +102,21 @@ def parse_args():
         "--status",
         action="store_true",
         help="Display audit readiness and extraction status for a task."
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Inspect recording metadata, generate thumbnail contact sheet, and verify course match before extraction."
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Run thumbnail inspection and course verification before extracting."
+    )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Run comprehensive environment, hardware, and binary diagnostic checks."
     )
     parser.add_argument(
         "--setup",
@@ -195,6 +211,23 @@ def resolve_target_and_course(
 def main():
     args = parse_args()
 
+    if args.test:
+        test_script = WORKSPACE_ROOT / "test_environment.py"
+        subprocess.run([sys.executable, str(test_script), "--model", args.model])
+        return
+
+    if args.preview:
+        preview_script = WORKSPACE_ROOT / "preview_recording.py"
+        cmd = [sys.executable, str(preview_script)]
+        if args.target:
+            cmd.append(args.target)
+        if args.course:
+            cmd.extend(["--course", args.course])
+        if args.all:
+            cmd.append("--all")
+        subprocess.run(cmd)
+        return
+
     if args.setup:
         from engine.setup import run_workspace_setup
         run_workspace_setup()
@@ -250,6 +283,12 @@ def main():
         args.target, args.course, audio_arg=args.audio, video_arg=args.video
     )
     pipeline = TaskPipeline(task_name, course_dir=course_dir)
+
+    if args.check:
+        from preview_recording import preview_single_recording
+        ref_media = video_path or audio_path or (pipeline.audio_path if pipeline.audio_path.is_file() else None)
+        if ref_media:
+            preview_single_recording(ref_media, course_dir=course_dir)
 
     if args.status:
         pipeline.print_status()
