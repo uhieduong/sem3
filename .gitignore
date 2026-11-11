@@ -27,6 +27,8 @@ dist/
 **/pipeline/**/audio.mp3
 **/pipeline/**/slides/
 **/pipeline/**/slide_timestamps.txt
+**/pipeline/**/preview_thumbnail.jpg
+**/pipeline/**/pdf_text.txt
 **/pipeline/**/_legacy_loose_files/
 **/pipeline/**/_quarantine/
 
@@ -39,8 +41,10 @@ bin/ffprobe
 **/bin/ffprobe
 
 # ==========================================
-# Java / IntelliJ IDEs (e.g. Further Prg)
+# Java / IntelliJ IDEs & Course Code Projects
 # ==========================================
+code/
+**/code/
 *.class
 **/*.class
 *.jar
