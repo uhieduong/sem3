@@ -1,6 +1,0 @@
-# 1. Download precompiled binaries (no sudo)
-curl -L https://evermeet.cx/ffmpeg/getrelease/zip -o ffmpeg.zip && unzip -o ffmpeg.zip -d bin/ && rm ffmpeg.zip
-curl -L https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip -o ffprobe.zip && unzip -o ffprobe.zip -d bin/ && rm ffprobe.zip
-# 2. Make them executable and remove macOS quarantine (no sudo)
-chmod +x bin/ffmpeg bin/ffprobe
-xattr -d com.apple.quarantine bin/ffmpeg bin/ffprobe 2>/dev/null
