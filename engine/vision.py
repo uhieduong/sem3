@@ -40,7 +40,8 @@ def pick_best_title_context(prev_title: str | None, next_title: str | None, cont
     for t in [prev_title, next_title]:
         if t and not t.startswith("Slide ") and "Non-deck" not in t:
             clean = re.sub(r'^[0-9]+[\)\.]\s*', '', t).strip()
-            if clean and clean not in candidates:
+            # Ignore purely numeric slide page numbers or overly brief labels
+            if clean and not clean.isdigit() and len(clean) > 2 and clean not in candidates:
                 candidates.append(clean)
     if not candidates:
         return ""
@@ -79,7 +80,7 @@ def synthesize_search_query(context: str, prev_title: str | None, next_title: st
     # 3. Clean topic context from slide titles
     best_title = pick_best_title_context(prev_title, next_title, context)
 
-    # 4. Extract acronyms / uppercase terms (e.g., FDD, XP, RUP, API, SQL, CSS)
+    # 4. Extract acronyms / uppercase terms (e.g., FDD, XP, RUP, API, SQL, CSS, W3C, OOP)
     abbrevs = list(dict.fromkeys(re.findall(r'\b[A-Z]{2,6}\b', context)))
 
     stopwords = {
@@ -88,14 +89,19 @@ def synthesize_search_query(context: str, prev_title: str | None, next_title: st
         "can", "see", "call", "called", "going", "what", "more", "focused", "actually", "under", "still",
         "next", "peer", "same", "also", "then", "just", "look", "like", "here", "there", "about", "some",
         "which", "when", "where", "how", "all", "any", "both", "each", "few", "more", "most", "other",
-        "will", "would", "should", "could", "into", "over", "such", "than", "them", "these", "those"
+        "will", "would", "should", "could", "into", "over", "such", "than", "them", "these", "those",
+        "your", "yours", "my", "mine", "our", "ours", "their", "theirs", "his", "her", "hers",
+        "okay", "ok", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "got", "thing", "things", "let", "lets", "example", "examples", "way", "ways", "yeah", "yes",
+        "right", "want", "need", "well", "know", "mean", "said", "say", "saying", "tell", "telling",
+        "come", "goes", "make", "take", "give", "put", "use", "using", "used", "shows", "showing"
     }
 
     words = [w.lower() for w in re.findall(r'\b[A-Za-z]{3,}\b', context) if w.lower() not in stopwords]
     counts = Counter(words)
 
     query_parts = []
-    if best_title:
+    if best_title and not best_title.isdigit():
         query_parts.append(best_title)
     for a in abbrevs[:2]:
         if a not in query_parts:

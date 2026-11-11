@@ -1,52 +1,57 @@
-# Multi-Task Lecture Processing & Verification Pipeline
+# Semester 3 Multi-Course Lecture Processing & Verification Workspace
 
-An isolated, task-partitioned workspace to ingest, transcribe, and verify multiple lecture recordings independently. Each lecture runs as a dedicated, self-contained task package inside `pipeline/<task_name>/` to guarantee that slide snapshots, transcripts, and audit summaries never cross-contaminate or mismatch.
+An isolated, multi-course workspace to ingest, transcribe, and verify lecture recordings independently across all Semester 3 subjects (`db application`, `further prg`, `se fundamentals`). Each lecture runs as a dedicated, self-contained task package inside its respective course's `pipeline/<task_name>/` to guarantee that slide snapshots, transcripts, and audit summaries never cross-contaminate or mismatch.
 
-All dependencies (`ffmpeg`, `ffprobe`, Python runtime, `faster-whisper`) are installed **locally inside this workspace** with zero global system modifications.
+All heavy dependencies (`ffmpeg`, `ffprobe`, Python runtime, `faster-whisper`) are installed **locally in the workspace root** with zero global system modifications.
 
 ---
 
 ## Directory Organization
 
 ```text
-se fundamentals/
-├── bin/
-│   ├── ffmpeg                     # Local FFmpeg binary (arm64)
-│   ├── ffprobe                    # Local FFprobe binary (arm64)
-│   └── activate.sh                # Shell activation script
-├── .venv/                         # Isolated Python 3.12 environment
-├── engine/                        # Modular Pipeline Backbone Engine
-│   ├── config.py                  # Workspace paths & processing constants
-│   ├── validator.py               # Strict naming & isolation guards
-│   ├── audio.py                   # FFmpeg audio extraction subsystem
-│   ├── vision.py                  # Slide detection & ORB deck alignment
-│   ├── transcriber.py             # Faster-Whisper transcription engine
-│   └── orchestrator.py            # TaskPipeline coordinator
-├── run.py                         # Unified Backbone CLI Entrypoint
-├── record/                        # Source recordings (.mp4)
-│   ├── lecture1.mp4
-│   └── lecture2.mp4
-├── lecture/                       # Official PDF slide decks
-│   ├── lecture1.pdf
-│   └── lecture2.pdf
-├── pipeline/                      # Task-partitioned pipeline outputs
-│   ├── lecture1/                  # Task Package: Lecture 1
-│   │   ├── audio.mp3              # Extracted 64k mono audio
-│   │   ├── slides/                # Keyframe slide snapshots (PNG)
-│   │   ├── slide_mapping.json     # Timestamp-to-slide lookup
-│   │   ├── deck_alignment.md      # Timeline matched to lecture1.pdf
-│   │   ├── transcript.json        # Structured transcript with confidence flags
-│   │   └── summary_verified.md    # Verified audit summary
-│   └── lecture2/                  # Task Package: Lecture 2
-│       ├── audio.mp3
-│       ├── slides/
-│       ├── slide_mapping.json
-│       ├── deck_alignment.md      # Timeline matched to lecture2.pdf
-│       ├── transcript.json
-│       └── summary_verified.md
-├── setup_workspace.py         # Automated Directory & Workspace Setup Tool
-├── audit.md                       # Strict audit & verification instructions for AI agents
-└── README.md                      # This reference guide
+sem3/
+├── bin/                               # Shared local FFmpeg & FFprobe binaries (arm64)
+│   ├── ffmpeg
+│   ├── ffprobe
+│   └── activate.sh                    # Shell activation script
+├── .venv/                             # Shared isolated Python environment
+├── engine/                            # Modular Pipeline Backbone Engine
+│   ├── config.py                      # Multi-course resolver & workspace paths
+│   ├── validator.py                   # Strict naming & isolation guards
+│   ├── audio.py                       # Audio extraction subsystem
+│   ├── vision.py                      # Slide detection, ORB alignment & web monitor
+│   ├── transcriber.py                 # Faster-Whisper transcription engine
+│   └── orchestrator.py                # TaskPipeline coordinator
+├── run.py                             # Unified Multi-Course CLI Entrypoint
+├── naming_validator.py                # Canonical filename & summary validator
+│
+├── db application/                    # Course: Database Applications
+│   ├── lecture/                       # Official slide decks (lecture1.pdf, etc.)
+│   ├── tutorial/                      # Tutorial worksheets (tutorial1.pdf, etc.)
+│   ├── record/                        # Video & audio recordings
+│   └── pipeline/                      # Task packages (lecture1/, lecture2/, etc.)
+│
+├── further prg/                       # Course: Further Programming (Java OOP)
+│   ├── code/                          # Practical Java code & exercises
+│   ├── lecture/
+│   ├── tutorial/
+│   ├── record/
+│   └── pipeline/
+│
+└── se fundamentals/                   # Course: Software Engineering Fundamentals
+    ├── assignment/                    # Course assessment specs
+    ├── lecture/
+    ├── tutorial/
+    ├── record/
+    └── pipeline/
+        ├── lecture1/                  # Task Package: Lecture 1
+        │   ├── audio.mp3              # Extracted 64k mono audio (git-ignored)
+        │   ├── slides/                # Keyframe slide snapshots (git-ignored)
+        │   ├── slide_mapping.json     # Timestamp-to-slide lookup
+        │   ├── deck_alignment.md      # Timeline matched to lecture1.pdf
+        │   ├── transcript.json        # Structured transcript with confidence flags
+        │   └── summary_verified.md    # Verified audit summary
+        └── lecture2/                  # Task Package: Lecture 2
 ```
 
 ---
@@ -112,11 +117,17 @@ The pipeline provides a consolidated entrypoint, [`run.py`](./run.py), powered b
 ### Option A: End-to-End Execution
 Process any combined video (`.mp4`), separated audio (`.m4a`, `.wav`), or audio+video pairs from start to finish:
 ```zsh
-# Standard combined video:
-python run.py record/lecture1.mp4
+# Run from workspace root (auto-detects target course from path):
+python run.py "further prg/record/lecture2.mp4"
+python run.py "db application/record/lecture2.mp4"
+python run.py "se fundamentals/record/lecture2.mp4"
+
+# Or cd into the course directory directly:
+cd "further prg"
+python run.py record/lecture2.mp4
 
 # Separated audio recording (.m4a, .mp3, .wav, etc.):
-python run.py record/lecture1.m4a
+python run.py "further prg/record/lecture2.m4a"
 
 # Explicit separated audio + video pairs:
 python run.py lecture1 --audio record/lecture1.m4a --video record/lecture1.mp4 --course "se fundamentals"
@@ -125,37 +136,37 @@ python run.py lecture1 --audio record/lecture1.m4a --video record/lecture1.mp4 -
 ### Option B: Media Extraction Only (Ready for Inspection / Audit Prep)
 Extracts audio and slide keyframes and matches against the PDF deck without waiting for Whisper:
 ```zsh
-python run.py record/lecture1.mp4 --extract-only
+python run.py "further prg/record/lecture2.mp4" --extract-only
 ```
 
 ### Option C: Inspect Task Readiness & Extraction Status
 Check the status of any task package:
 ```zsh
-python run.py --status lecture1
-python run.py --status lecture2
+python run.py --status lecture2 --course "further prg"
+python run.py --status lecture2 --course "db application"
 ```
 
 ### Option D: Transcribe an Extracted Task
 Run or re-run speech-to-text on an already extracted task:
 ```zsh
-python run.py --transcribe lecture1 -m small
+python run.py --transcribe lecture2 -m small --course "further prg"
 ```
 
-### Option E: Slide Deck Visual Alignment
-Match or re-match slides against an official deck:
+### Option E: Slide Deck Visual Alignment & Web Search Enrichment
+Match slides against an official PDF deck and correlate speech context for web screen activities:
 ```zsh
-python run.py --align lecture1 --deck lecture/lecture1.pdf
+python run.py --align lecture2 --deck "further prg/lecture/lecture2.pdf" --course "further prg"
 ```
 
 ### Option F: Batch Ingest All Recordings
-Process all video files currently inside `record/`:
+Process all video files currently inside a course's `record/` directory:
 ```zsh
-python run.py --all
+python run.py --all --course "further prg"
 ```
 
 ---
 
-### Option B: Step-by-Step Task Execution
+### Option G: Step-by-Step Task Execution
 
 If you prefer manual control for a task (e.g., `lecture1`):
 
