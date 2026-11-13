@@ -66,6 +66,20 @@ python setup_workspace.py
 python run.py --setup
 ```
 
+Create the shared virtual environment and install its dependencies once. Python 3.10–3.12 is recommended:
+
+```zsh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
+
+If `.venv` was created with a different Python version, recreate it and reinstall the dependencies:
+
+```zsh
+python3.12 -m venv --clear .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
+
 Before running processing commands in your terminal, activate the environment:
 
 ```zsh
